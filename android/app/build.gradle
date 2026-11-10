@@ -1,0 +1,42 @@
+plugins { id 'com.android.application' }
+
+// Variáveis configuráveis no computador ou nos Secrets do GitHub Actions.
+def appUrl = System.getenv('ODONTOAI_APP_URL') ?: 'https://SEU-DOMINIO-AQUI.example'
+def signingPath = System.getenv('ODONTOAI_KEYSTORE_FILE')
+def signingPass = System.getenv('ODONTOAI_KEYSTORE_PASSWORD')
+def signingAlias = System.getenv('ODONTOAI_KEY_ALIAS')
+def signingKeyPass = System.getenv('ODONTOAI_KEY_PASSWORD')
+def hasSigning = signingPath && signingPass && signingAlias && signingKeyPass
+
+android {
+    namespace 'com.odontai.agenda'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.odontai.agenda'
+        minSdk 26
+        targetSdk 36
+        versionCode 2
+        versionName '1.2.0'
+        resValue 'string', 'app_url', appUrl
+    }
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                storeFile file(signingPath)
+                storePassword signingPass
+                keyAlias signingAlias
+                keyPassword signingKeyPass
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (hasSigning) signingConfig signingConfigs.release
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
